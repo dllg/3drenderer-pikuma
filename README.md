@@ -18,6 +18,7 @@ $ git clone git@github.com:microsoft/vcpkg.git
 $ cd vcpkg
 $ ./bootstrap-vcpkg.sh
 $ ./vcpkg install sdl2
+$ export VCPKG_ROOT="$(pwd)"
 $ popd
 $ mkdir build
 $ cd build
