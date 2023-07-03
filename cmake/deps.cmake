@@ -11,6 +11,7 @@ endif()
 # Add dependencies here
 set(dependencies
     SDL2::SDL2
+    m
 )
 
 # Add include directories here
