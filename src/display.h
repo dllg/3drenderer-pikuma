@@ -16,6 +16,7 @@ extern int window_height;
 // Function prototypes
 extern bool initialize_window(void);
 extern void draw_grid(int distance, uint32_t color);
+extern void draw_pixel(int x, int y, uint32_t color);
 extern void draw_rect(int x, int y, int width, int height, uint32_t color);
 extern void render_color_buffer(void);
 extern void clear_color_buffer(uint32_t color);
