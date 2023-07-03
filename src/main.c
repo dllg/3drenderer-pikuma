@@ -1,4 +1,5 @@
 #include "display.h"
+#include "vector.h"
 
 void setup(void)
 {
@@ -58,6 +59,8 @@ int main(void)
     bool is_running = initialize_window();
 
     setup();
+
+    // vec3_t myvector = { 2.0, 3.0, -4.0 };
 
     while (is_running)
     {
