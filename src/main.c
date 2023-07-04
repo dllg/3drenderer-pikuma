@@ -23,7 +23,7 @@ void setup(void)
         window_width,
         window_height);
 
-    load_cube_mesh_data();
+    load_obj_file_data("./assets/cube.obj");
 }
 
 bool process_input(void)
