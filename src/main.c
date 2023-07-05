@@ -3,8 +3,8 @@
 #include "vector.h"
 #include "mesh.h"
 
-triangle_t* triangles_to_render = NULL;
-vec3_t camera_position = {.x = 0, .y = 0, .z = -5};
+triangle_t *triangles_to_render = NULL;
+vec3_t camera_position = {0, 0, 0};
 
 float fov_factor = 640;
 
@@ -76,12 +76,16 @@ void update(void)
     for (int i = 0; i < num_faces; i++)
     {
         face_t mesh_face = mesh.faces[i];
+
         vec3_t face_vertices[3];
         face_vertices[0] = mesh.vertices[mesh_face.a - 1];
         face_vertices[1] = mesh.vertices[mesh_face.b - 1];
         face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
         triangle_t projected_triangle;
+
+        vec3_t transformed_vertices[3];
+
         // Loop all 3 vertices of this current face and apply transformations
         for (int j = 0; j < 3; j++)
         {
@@ -91,10 +95,39 @@ void update(void)
             transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
             // Translate the vertex away from the camera
-            transformed_vertex.z -= camera_position.z;
+            transformed_vertex.z += 5;
 
+            // Save transformed vertex in array of transformed vertices
+            transformed_vertices[j] = transformed_vertex;
+        }
+
+        // Check backface culling
+        vec3_t vector_a = transformed_vertices[0]; /*   A   */
+        vec3_t vector_b = transformed_vertices[1]; /*  / \  */
+        vec3_t vector_c = transformed_vertices[2]; /* C---B */
+
+        // Get the vector subtraction of B-A and C-A
+        vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+        vec3_t vector_ca = vec3_sub(vector_c, vector_a);
+
+        // Compute the face normal using the cross product to find the vector perpendicular
+        vec3_t normal = vec3_cross(vector_ab, vector_ca); // Left-handed coordinate system
+
+        // Find the vector between the camera and the first vertex of the face
+        vec3_t camera_ray = vec3_sub(camera_position, vector_a);
+
+        // Check how aligned my normal is with the camera ray
+        float dot_normal_camera = vec3_dot(normal, camera_ray);
+
+        // Bypass the triangle that are looking away from the camera
+        if (dot_normal_camera < 0)
+            continue;
+
+        // Loop all 3 vertices and perform the projection transformation
+        for (int j = 0; j < 3; j++)
+        {
             // Project the current vertex
-            vec2_t projected_point = project(transformed_vertex);
+            vec2_t projected_point = project(transformed_vertices[j]);
 
             // Scale and translate projected points to the middle of the screen
             projected_point.x += (window_width / 2);
