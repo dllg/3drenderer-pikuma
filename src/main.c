@@ -17,6 +17,10 @@ bool enable_backface_culling = true;
 
 void setup(void)
 {
+    // Initalize render mode and triangle culling method
+    render_method = RENDER_WIRE;
+    cull_method = CULL_BACKFACE;
+
     // Allocate memory for color buffer
     color_buffer = (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
 
@@ -39,7 +43,6 @@ bool process_input(void)
     switch (event.type)
     {
     case SDL_MOUSEMOTION:
-    case SDL_MOUSEBUTTONDOWN:
         if (event.button.button == SDL_BUTTON_LEFT)
         {
             mesh.rotation.x += event.motion.yrel / 100.0f;
@@ -52,40 +55,18 @@ bool process_input(void)
     case SDL_KEYDOWN:
         if (event.key.keysym.sym == SDLK_ESCAPE)
             return false;
-        break;
-    case SDL_KEYUP:
         if (event.key.keysym.sym == SDLK_1)
-        {
-            draw_points = true;
-            draw_wireframe = true;
-            draw_filled_triangles = false;
-        }
-        else if (event.key.keysym.sym == SDLK_2)
-        {
-            draw_points = false;
-            draw_wireframe = true;
-            draw_filled_triangles = false;
-        }
-        else if (event.key.keysym.sym == SDLK_3)
-        {
-            draw_points = false;
-            draw_wireframe = false;
-            draw_filled_triangles = true;
-        }
-        else if (event.key.keysym.sym == SDLK_4)
-        {
-            draw_points = false;
-            draw_wireframe = true;
-            draw_filled_triangles = true;
-        }
-        else if (event.key.keysym.sym == SDLK_c)
-        {
-            enable_backface_culling = true;
-        }
-        else if (event.key.keysym.sym == SDLK_d)
-        {
-            enable_backface_culling = false;
-        }
+            render_method = RENDER_WIRE_VERTEX;
+        if (event.key.keysym.sym == SDLK_2)
+            render_method = RENDER_WIRE;
+        if (event.key.keysym.sym == SDLK_3)
+            render_method = RENDER_FILL_TRIANGLE;
+        if (event.key.keysym.sym == SDLK_4)
+            render_method = RENDER_FILL_TRIANGLE_WIRE;
+        if (event.key.keysym.sym == SDLK_c)
+            cull_method = CULL_BACKFACE;
+        if (event.key.keysym.sym == SDLK_d)
+            cull_method = CULL_NONE;
         break;
     default:
         break;
@@ -145,7 +126,7 @@ void update(void)
         }
 
         // Check backface culling
-        if (enable_backface_culling)
+        if (cull_method == CULL_BACKFACE)
         {
             vec3_t vector_a = transformed_vertices[0]; /*   A   */
             vec3_t vector_b = transformed_vertices[1]; /*  / \  */
@@ -196,20 +177,20 @@ void render(void)
     for (int i = 0; i < num_triangles; i++)
     {
         triangle_t triangle = triangles_to_render[i];
-        if (draw_points)
+        if (render_method == RENDER_WIRE_VERTEX)
         {
             draw_rect(triangle.points[0].x - 2, triangle.points[0].y - 2, 4, 4, 0xFFFF0000);
             draw_rect(triangle.points[1].x - 2, triangle.points[1].y - 2, 4, 4, 0xFFFF0000);
             draw_rect(triangle.points[2].x - 2, triangle.points[2].y - 2, 4, 4, 0xFFFF0000);
         }
-        if (draw_filled_triangles)
+        if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE)
         {
             draw_filled_triangle(triangle.points[0].x, triangle.points[0].y,
                                  triangle.points[1].x, triangle.points[1].y,
                                  triangle.points[2].x, triangle.points[2].y,
                                  0xFFFFFFFF);
         }
-        if (draw_wireframe)
+        if (render_method == RENDER_WIRE  || render_method == RENDER_WIRE_VERTEX || render_method == RENDER_FILL_TRIANGLE_WIRE)
         {
             draw_triangle(triangle.points[0].x, triangle.points[0].y,
                           triangle.points[1].x, triangle.points[1].y,
