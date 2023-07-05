@@ -32,6 +32,14 @@ float vec2_dot(vec2_t a, vec2_t b)
     return a.x * b.x + a.y * b.y;
 }
 
+void vec2_normalize(vec2_t *v)
+{
+    float length = vec2_length(*v);
+    v->x /= length;
+    v->y /= length;
+}
+
+
 // Implemetation of Vector 3d functions
 float vec3_length(vec3_t v)
 {
@@ -63,8 +71,7 @@ vec3_t vec3_cross(vec3_t a, vec3_t b)
     vec3_t cross_product = {
         .x = a.y * b.z - a.z * b.y,
         .y = a.z * b.x - a.x * b.z,
-        .z = a.x * b.y - a.y * b.x
-    };
+        .z = a.x * b.y - a.y * b.x};
     return cross_product;
 }
 
@@ -73,13 +80,20 @@ float vec3_dot(vec3_t a, vec3_t b)
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
+void vec3_normalize(vec3_t *v)
+{
+    float length = vec3_length(*v);
+    v->x /= length;
+    v->y /= length;
+    v->z /= length;
+}
+
 vec3_t vec3_rotate_x(vec3_t v, float angle)
 {
     vec3_t rotated_vector = {
         .x = v.x,
         .y = v.y * cos(angle) - v.z * sin(angle),
-        .z = v.y * sin(angle) + v.z * cos(angle)
-    };
+        .z = v.y * sin(angle) + v.z * cos(angle)};
     return rotated_vector;
 }
 
@@ -88,8 +102,7 @@ vec3_t vec3_rotate_y(vec3_t v, float angle)
     vec3_t rotated_vector = {
         .x = v.x * cos(angle) - v.z * sin(angle),
         .y = v.y,
-        .z = v.x * sin(angle) + v.z * cos(angle)
-    };
+        .z = v.x * sin(angle) + v.z * cos(angle)};
     return rotated_vector;
 }
 
@@ -98,7 +111,6 @@ vec3_t vec3_rotate_z(vec3_t v, float angle)
     vec3_t rotated_vector = {
         .x = v.x * cos(angle) - v.y * sin(angle),
         .y = v.x * sin(angle) + v.y * cos(angle),
-        .z = v.z
-    };
+        .z = v.z};
     return rotated_vector;
 }
