@@ -170,15 +170,36 @@ void update(void)
                 { .x = projected_points[1].x, .y = projected_points[1].y },
                 { .x = projected_points[2].x, .y = projected_points[2].y }
             },
-            .color = mesh_face.color
+            .color = mesh_face.color,
+            .avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0f
         };
         // Save the projected triangle in the array of triangles to render
         array_push(triangles_to_render, projected_triangle);
     }
 }
 
+// sort the triangles on depth
+void sort(void)
+{
+    int num_triangles = array_length(triangles_to_render);
+    for (int i = 0; i < num_triangles - 1; i++)
+    {
+        for (int j = 0; j < num_triangles - i - 1; j++)
+        {
+            if (triangles_to_render[j].avg_depth < triangles_to_render[j + 1].avg_depth)
+            {
+                triangle_t temp = triangles_to_render[j];
+                triangles_to_render[j] = triangles_to_render[j + 1];
+                triangles_to_render[j + 1] = temp;
+            }
+        }
+    }
+}
+
 void render(void)
 {
+    sort(); // Sort the triangles to render by depth
+
     // Loop all projected points and render them
     int num_triangles = array_length(triangles_to_render);
     for (int i = 0; i < num_triangles; i++)
