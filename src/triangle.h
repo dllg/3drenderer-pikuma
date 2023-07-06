@@ -9,12 +9,14 @@ typedef struct
     int a;
     int b;
     int c;
+    uint32_t color;
 } face_t;
 
 #define N_TRIANGLE_POINTS 3
 typedef struct
 {
     vec2_t points[N_TRIANGLE_POINTS];
+    uint32_t color;
 } triangle_t;
 
 
