@@ -73,6 +73,14 @@ bool process_input(void)
             mesh.scale.x += 0.01f;
         if (event.key.keysym.sym == SDLK_z)
             mesh.scale.x -= 0.01f;
+        if (event.key.keysym.sym == SDLK_UP)
+            mesh.translation.y -= 0.1f;
+        if (event.key.keysym.sym == SDLK_DOWN)
+            mesh.translation.y += 0.1f;
+        if (event.key.keysym.sym == SDLK_LEFT)
+            mesh.translation.x -= 0.1f;
+        if (event.key.keysym.sym == SDLK_RIGHT)
+            mesh.translation.x += 0.1f;
         break;
     default:
         break;
@@ -101,8 +109,9 @@ void update(void)
     // Initialize triangles to render
     triangles_to_render = NULL;
 
-    // Make scale matrix
+    mesh.translation.z = 5.0;
     mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+    mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
 
     // Loop all triangle faces of our mesh
     int num_faces = array_length(mesh.faces);
@@ -122,16 +131,16 @@ void update(void)
         {
             vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
-            // Use a matrix to scale our original vertex
+            // Use a matrix to scale our original vertex (make it bigger or smaller)
             transformed_vertex = mat4_mul_vec4(scale_matrix, transformed_vertex);
+
+            // Use a matrix to translate our original vertex (move it around in 3d space)
+            transformed_vertex = mat4_mul_vec4(translation_matrix, transformed_vertex);
 
             // Rotate the vertex
             // transformed_vertex = vec3_rotate_x(transformed_vertex, mesh.rotation.x);
             // transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
             // transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
-
-            // Translate the vertex away from the camera
-            transformed_vertex.z += 5;
 
             // Save transformed vertex in array of transformed vertices
             transformed_vertices[j] = transformed_vertex;
