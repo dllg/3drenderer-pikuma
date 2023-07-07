@@ -6,8 +6,7 @@
 
 triangle_t *triangles_to_render = NULL;
 vec3_t camera_position = {0, 0, 0};
-
-float fov_factor = 640;
+mat4_t proj_matrix;
 
 int previous_frame_time = 0;
 
@@ -35,6 +34,13 @@ void setup(void)
 
     load_cube_mesh_data();
     // load_obj_file_data("./assets/cube.obj");
+
+    // Initialize projection matrix
+    float fov = M_PI / 3.0f; // The same as 180/3 = 60 degrees
+    float aspect = (float)window_height / (float)window_width;
+    float znear = 0.1f;
+    float zfar = 100.0f;
+    proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 }
 
 bool process_input(void)
@@ -48,7 +54,7 @@ bool process_input(void)
         if (event.button.button == SDL_BUTTON_LEFT)
         {
             mesh.rotation.x += event.motion.yrel / 100.0f;
-            mesh.rotation.y += event.motion.xrel / 100.0f;
+            mesh.rotation.y -= event.motion.xrel / 100.0f;
         }
         break;
     case SDL_QUIT:
@@ -88,14 +94,6 @@ bool process_input(void)
     return true;
 }
 
-// Function that receives a 3d vector and returns a projected 2d point
-vec2_t project(vec3_t point)
-{
-    vec2_t projected_point = {
-        .x = fov_factor * point.x / point.z,
-        .y = fov_factor * point.y / point.z};
-    return projected_point;
-}
 
 void update(void)
 {
@@ -136,6 +134,7 @@ void update(void)
 
             // Create a World Matrix to scale, rotate and translate our original vertices
             mat4_t world_matrix = mat4_identity();
+            // Order matters: scale -> rotate -> translate
             world_matrix = mat4_mul_mat4(scale_matrix, world_matrix);
             world_matrix = mat4_mul_mat4(rotation_matrix_x, world_matrix);
             world_matrix = mat4_mul_mat4(rotation_matrix_y, world_matrix);
@@ -177,16 +176,20 @@ void update(void)
                 continue;
         }
 
-        vec2_t projected_points[3];
         // Loop all 3 vertices and perform the projection transformation
+        vec4_t projected_points[3];
         for (int j = 0; j < 3; j++)
         {
             // Project the current vertex
-            projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+            projected_points[j] = mat4_mul_vec4_project(proj_matrix, transformed_vertices[j]);
 
-            // Scale and translate projected points to the middle of the screen
-            projected_points[j].x += (window_width / 2);
-            projected_points[j].y += (window_height / 2);
+            // Scale into the view
+            projected_points[j].x *= (window_width / 2.0);
+            projected_points[j].y *= (window_height / 2.0);
+
+            // Translate projected points to the middle of the screen
+            projected_points[j].x += (window_width / 2.0);
+            projected_points[j].y += (window_height / 2.0);
         }
 
         triangle_t projected_triangle = {
