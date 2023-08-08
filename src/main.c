@@ -33,8 +33,8 @@ void setup(void)
         window_width,
         window_height);
 
-    load_cube_mesh_data();
-    load_obj_file_data("./assets/cube.obj");
+    // load_cube_mesh_data();
+    load_obj_file_data("./assets/f22.obj");
 
     // Initialize projection matrix
     float fov = M_PI / 3.0f; // The same as 180/3 = 60 degrees
@@ -54,7 +54,7 @@ bool process_input(void)
     case SDL_MOUSEMOTION:
         if (event.button.button == SDL_BUTTON_LEFT)
         {
-            mesh.rotation.x += event.motion.yrel / 100.0f;
+            mesh.rotation.x -= event.motion.yrel / 100.0f;
             mesh.rotation.y -= event.motion.xrel / 100.0f;
         }
         break;
